@@ -10,15 +10,16 @@ const supportScene = require('./controllers/support');
 const netwareAdminScene = require('./controllers/netwareAdmin');
 const clientsAdminScene = require('./controllers/clientsAdmin');
 
+const sendReqToDB = require('./modules/tlg_to_DB');
 
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 const bot = new Telegraf(TELEGRAM_BOT_TOKEN);
 
 const stage = new Scenes.Stage([
-    receiptScene,
-    supportScene,
-    netwareAdminScene,
-    clientsAdminScene
+	receiptScene,
+	supportScene,
+	netwareAdminScene,
+	clientsAdminScene
 ]);
 
 bot.use(session());
@@ -30,26 +31,28 @@ bot.hears('Netware support', ctx => ctx.scene.enter('netwareAdminWizard'));
 bot.hears('Clients support', ctx => ctx.scene.enter('clientsAdminWizard'));
 
 bot.start(async (ctx) => {
-    console.log(ctx.chat);  
-    const recognizeUser = users.find(user => user.id === ctx.chat.id);
-    if (!recognizeUser) {
-        try {
-        await ctx.replyWithHTML(`Чат-бот <b>ISP SILVER-SERVICE</b> вітає Вас, <b>${ctx.chat.first_name} ${ctx.chat.last_name}</b>!
+	console.log(new Date());
+	console.log(ctx.chat);
+	sendReqToDB('__CheckTlgClient__', ctx.chat, '');
+	const recognizeUser = users.find(user => user.id === ctx.chat.id);
+	if (!recognizeUser) {
+		try {
+			await ctx.replyWithHTML(`Чат-бот <b>ISP SILVER-SERVICE</b> вітає Вас, <b>${ctx.chat.first_name} ${ctx.chat.last_name}</b>!
 Вам надано гостьовий доступ`);
-        await ctx.reply("Оберіть, будь ласка, дію", guestStartButtons);
-        } catch (err) {
-          console.log(err);
-        }
-    } else {
-        try {
-        await ctx.reply(`Hi, ${ctx.chat.first_name} ${ctx.chat.last_name}!
+			await ctx.reply("Оберіть, будь ласка, дію", guestStartButtons);
+		} catch (err) {
+			console.log(err);
+		}
+	} else {
+		try {
+			await ctx.reply(`Hi, ${ctx.chat.first_name} ${ctx.chat.last_name}!
 You have been granted administrative access`);
-        await ctx.reply("Choose an action", adminStartButtons);
-        } catch (err) {
-          console.log(err);
-        }
-    }
- });
+			await ctx.reply("Choose an action", adminStartButtons);
+		} catch (err) {
+			console.log(err);
+		}
+	}
+});
 
 bot.startPolling();
 
