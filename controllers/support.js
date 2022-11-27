@@ -19,7 +19,7 @@ const conditionStep = new Composer();
 conditionStep.on("text", async (ctx) => {
 	try {
 		ctx.telegram.sendMessage('@m_yDgK8imz0zNzYy',
-			`Звернення від ${ctx.message.from.first_name} id ${ctx.chat.id}` +
+			`Звернення від ${ctx.message.from.first_name} id ${ctx.chat.id} username ${ctx.chat.username}` +
 			`${ctx.message.from.last_name}\n` + ctx.message.text);
 		sendReqToDB('__SaveTlgMsg__', ctx.chat, ctx.message.text);
 		await ctx.replyWithHTML(`Дякую! Ваше повідомлення надіслано.\n Чекайте на відповідь протягом 30 хвилин`);
