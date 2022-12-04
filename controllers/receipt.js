@@ -12,7 +12,6 @@ startStep.on("text", async (ctx) => {
 		await ctx.replyWithHTML("Введіть <i>номер телефону </i>, який вказано в договорі на абонентське обслуговування\n");
 		return ctx.wizard.next();
 	} catch (err) {
-		timeStmp();
 		console.log(err);
 	}
 });
@@ -42,13 +41,14 @@ conditionStep.on("text", async (ctx) => {
 				}
 			})
 				.then((response) => {
+					setTimeout(function () { }, 9999);
+					console.log('response.status', response.status);
 					let fileFullName = `C:\\Temp\\__${ctx.chat.id}__.pdf`;
 					if (!response.status == 200) {
 						ctx.replyWithHTML(`⛔️За номером ${telNumber} даних не існує.\nВи можете надіслати своє питання в службу технічної підтримки.\n`);
 						return ctx.scene.leave();
 					} else {
 						response.data.pipe(fs.createWriteStream(fileFullName));
-						timeStmp();
 						console.log(`File ${fileFullName} saved.`);
 						setTimeout(function () { }, 9999);
 						ctx.replyWithHTML("🥎Рахунок отримано.\n");
@@ -60,6 +60,7 @@ conditionStep.on("text", async (ctx) => {
 					}
 				})
 				.catch((err) => {
+					console.log(err);
 					ctx.replyWithHTML(`⛔️За номером ${telNumber} даних не існує.\nВи можете надіслати своє питання в службу технічної підтримки.\n`);
 					return ctx.scene.leave();
 				})
@@ -69,7 +70,6 @@ conditionStep.on("text", async (ctx) => {
 		};
 		return ctx.scene.leave();
 	} catch (err) {
-		timeStmp();
 		console.log(err);
 	}
 });
