@@ -1,13 +1,13 @@
+require('dotenv').config();
 const { MArkup, Composer, Scenes } = require('telegraf');
 const axios = require(`axios`);
 const URL = process.env.URL;
-const AUTH_TOKEN = process.env.AUTH_TOKEN;
 
 const startStep = new Composer();
 
 startStep.on("text", async (ctx) => {
 	try {
-		htmlText = "Введіть <i>номер телефону </i> або <i>адресу через # </i>, що є в договорі на абонентське обслуговування.\nТакож формат для відправки відповіді по id клієнта #id...id...#id...відповідь...\n";
+		let htmlText = "Введіть <i>номер телефону </i> або <i>адресу через # </i>, що є в договорі на абонентське обслуговування.\nТакож формат для відправки відповіді по id клієнта #id...id...#id...відповідь...\n";
 		await ctx.replyWithHTML(htmlText);
 		return ctx.wizard.next();
 	} catch (err) {
@@ -22,8 +22,9 @@ conditionStep.on("text", async (ctx) => {
 		if (inputLine.includes("id#")) {
 			let id = inputLine.split("id#")[1];
 			let msgtext = inputLine.split("id#")[2];
+			console.log(msgtext);
 			try {
-				await ctx.telegram.sendMessage(id, `Дякуємо за звернення, відповідь: \n ${msgtext}`);
+				ctx.telegram.sendMessage(id, `Дякуємо за звернення, відповідь: \n ${msgtext}`);
 				return ctx.scene.leave();
 			} catch (err) {
 				console.log(err);
