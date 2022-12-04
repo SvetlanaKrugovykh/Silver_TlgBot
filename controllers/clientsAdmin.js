@@ -7,7 +7,8 @@ const startStep = new Composer();
 
 startStep.on("text", async (ctx) => {
 	try {
-		await ctx.replyWithHTML("Введіть <i>номер телефону </i> або <i>адресу через # </i>, що є в договорі на абонентське обслуговування\n");
+		htmlText = "Введіть <i>номер телефону </i> або <i>адресу через # </i>, що є в договорі на абонентське обслуговування.\nТакож формат для відправки відповіді по id клієнта #id...id...#id...відповідь...\n";
+		await ctx.replyWithHTML(htmlText);
 		return ctx.wizard.next();
 	} catch (err) {
 		console.log(err);
@@ -20,12 +21,14 @@ conditionStep.on("text", async (ctx) => {
 		let inputLine = ctx.message.text;
 		if (inputLine.includes("id#")) {
 			let id = inputLine.split("id#")[1];
-			console.log(ctx.message.text);
-			await ctx.replyWithHTML("Введіть текст повідомлення для відправки\n");
-			ctx.wizard.next();
-			console.log(id);
-			await ctx.telegram.sendMessage(id, `Дякуємо за звернення, відповідь: \n ${ctx.message.text}`);
-			return ctx.scene.leave();
+			let msgtext = inputLine.split("id#")[2];
+			try {
+				await ctx.telegram.sendMessage(id, `Дякуємо за звернення, відповідь: \n ${msgtext}`);
+				return ctx.scene.leave();
+			} catch (err) {
+				console.log(err);
+				return ctx.scene.leave();
+			}
 		}
 		console.log('inputLine:', inputLine);
 		axios({
