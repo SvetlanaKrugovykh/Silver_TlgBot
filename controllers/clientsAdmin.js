@@ -2,6 +2,7 @@ require('dotenv').config();
 const { MArkup, Composer, Scenes } = require('telegraf');
 const axios = require(`axios`);
 const URL = process.env.URL;
+const AUTH_TOKEN = process.env.AUTH_TOKEN;
 
 const startStep = new Composer();
 
