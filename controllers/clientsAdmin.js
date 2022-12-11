@@ -4,12 +4,13 @@ const axios = require(`axios`);
 const URL = process.env.URL;
 const AUTH_TOKEN = process.env.AUTH_TOKEN;
 const sendReqToDB = require('../modules/tlg_to_DB');
+let infoFound = false;
 
 const startStep = new Composer();
-let infoFound = false;
 
 startStep.on("text", async (ctx) => {
 	try {
+		infoFound = false;
 		let htmlText = "Введіть <i>номер телефону </i> або <i>адресу через # </i>, що є в договорі на абонентське обслуговування.\nТакож формат для відправки відповіді по id клієнта #id...id...#id...відповідь...\n";
 		await ctx.replyWithHTML(htmlText);
 		return ctx.wizard.next();
@@ -41,11 +42,14 @@ conditionStep.on("text", async (ctx) => {
 				if (txtCommand.includes('switchon#')) {
 					sendReqToDB('___SwitchOn__', '', txtCommand);
 					ctx.replyWithHTML(`🥎🥎 request sent\n`);
+					infoFound = false;
+					return ctx.scene.leave();
 				}
 			} catch (err) {
 				console.log(err);
+				infoFound = false;
+				return ctx.scene.leave();
 			}
-			return ctx.scene.leave();
 		}
 		axios({
 			method: 'post',
