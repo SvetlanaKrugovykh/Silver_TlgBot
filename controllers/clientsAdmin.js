@@ -3,8 +3,10 @@ const { MArkup, Composer, Scenes } = require('telegraf');
 const axios = require(`axios`);
 const URL = process.env.URL;
 const AUTH_TOKEN = process.env.AUTH_TOKEN;
+const sendReqToDB = require('../modules/tlg_to_DB');
 
 const startStep = new Composer();
+let infoFound = false;
 
 startStep.on("text", async (ctx) => {
 	try {
@@ -33,6 +35,18 @@ conditionStep.on("text", async (ctx) => {
 			}
 		}
 		console.log('inputLine:', inputLine);
+		if (infoFound) {
+			try {
+				let txtCommand = inputLine;
+				if (txtCommand.includes('switchon#')) {
+					sendReqToDB('___SwitchOn__', '', txtCommand);
+					ctx.replyWithHTML(`🥎🥎 request sent\n`);
+				}
+			} catch (err) {
+				console.log(err);
+			}
+			return ctx.scene.leave();
+		}
 		axios({
 			method: 'post',
 			url: URL,
@@ -53,6 +67,7 @@ conditionStep.on("text", async (ctx) => {
 					let answer = response.data.toString();
 					console.log(answer);
 					ctx.replyWithHTML(`🥎\n ${answer}.\n`);
+					infoFound = true;
 				}
 			})
 			.catch((err) => {
@@ -62,7 +77,6 @@ conditionStep.on("text", async (ctx) => {
 			.then(() => {
 				ctx.replyWithHTML("👋💙💛 Have a nice day!\n");
 			});
-		return ctx.scene.leave();
 	} catch (err) {
 		console.log(err);
 	}
