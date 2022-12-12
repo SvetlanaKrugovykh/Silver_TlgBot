@@ -71,9 +71,12 @@ conditionStep.on("text", async (ctx) => {
 					let answer = response.data.toString();
 					console.log(answer);
 					ctx.replyWithHTML(`🥎\n ${answer}.\n`);
-					infoFound = true;
-				}
-			})
+					if (response.data.split(',').length > 1) {
+						infoFound = true;
+					} else {
+						return ctx.scene.leave();
+					}
+				})
 			.catch((err) => {
 				ctx.replyWithHTML(`⛔️Жодної інформації за запитом не знайдено`);
 				return ctx.scene.leave();
