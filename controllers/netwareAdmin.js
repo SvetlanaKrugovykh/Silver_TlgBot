@@ -7,7 +7,7 @@ const { MArkup, Composer, Scenes } = require('telegraf');
 const sendReqToDB = require('../modules/tlg_to_DB');
 const URL = process.env.URL;
 const AUTH_TOKEN = process.env.AUTH_TOKEN;
-const { cli, devices } = require('./data/cli.model');
+const { cli, devices } = require('../data/cli.model');
 
 
 let params = {
@@ -93,7 +93,7 @@ conditionStep.on("text", async (ctx) => {
 });
 
 
-const netwareAdminScene = new Scenes.WizardScene('netwareAdminWizard', startStep, conditionStep));
+const netwareAdminScene = new Scenes.WizardScene('netwareAdminWizard', startStep, conditionStep);
 
 module.exports = netwareAdminScene;
 
