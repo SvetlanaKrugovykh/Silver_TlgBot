@@ -4,6 +4,7 @@ const axios = require(`axios`);
 const URL = process.env.URL;
 const AUTH_TOKEN = process.env.AUTH_TOKEN;
 const sendReqToDB = require('../modules/tlg_to_DB');
+const telnetCall = require('../modules/telnet');
 let infoFound = false;
 
 const startStep = new Composer();
@@ -22,6 +23,7 @@ startStep.on("text", async (ctx) => {
 const conditionStep = new Composer();
 conditionStep.on("text", async (ctx) => {
 	try {
+		console.log(((new Date()).toLocaleTimeString()));
 		let inputLine = ctx.message.text;
 		console.log('inputLine:', inputLine);
 		if (inputLine.includes("id#")) {
@@ -68,9 +70,28 @@ conditionStep.on("text", async (ctx) => {
 					ctx.replyWithHTML(`⛔️Ніякої інформації за запитом не знайдено`);
 					return ctx.scene.leave();
 				} else {
-					let answer = response.data.toString();
-					console.log(answer);
-					ctx.replyWithHTML(`🥎\n ${answer}.\n`);
+					console.log(response.data.toString());
+					ctx.replyWithHTML(`🥎\n ${response.data.toString()}.\n`);
+					let responseData = JSON.parse(response.data);
+					if (responseData.ResponseArray[0].HOST) {
+						const HOST = responseData.ResponseArray[0].HOST;
+						console.log(HOST);
+						let match = responseData.ResponseArray[0].Comment.match(/^\w+\/\d+:\d+/);
+						if (match) {
+							const comment = match[0];
+							console.log(comment);
+							telnetCall(HOST, comment)
+								.then(store => {
+									console.dir(store);
+									ctx.replyWithHTML(`🥎\n ${store.toString()}.\n`);
+								})
+								.catch(err => {
+									console.log(err);
+								});
+						}
+					}
+
+
 					if (response.data.split(',').length > 1) {
 						infoFound = true;
 					} else {
