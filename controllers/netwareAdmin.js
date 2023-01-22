@@ -2,27 +2,15 @@
 
 require('dotenv').config();
 const axios = require(`axios`);
-const { Telnet } = require('telnet-client');
 const { MArkup, Composer, Scenes } = require('telegraf');
-const sendReqToDB = require('../modules/tlg_to_DB');
 const URL = process.env.URL;
 const AUTH_TOKEN = process.env.AUTH_TOKEN;
 const { cli, devices } = require('../data/cli.model');
-
-
-let params = {
-	host: '127.0.0.1',
-	port: 23,
-	shellPrompt: '/ # ', // or negotiationMandatory: false
-	timeout: 1500
-};
-
-
+const telnetCall = require('../modules/telnet');
 
 const startStep = new Composer();
 startStep.on("text", async (ctx) => {
 	try {
-		infoFound = false;
 		let htmlText = "Введіть <i>номер телефону </i> або <i>адресу через # </i>, що є в договорі на абонентське обслуговування.\nТа команду, що необхідно виконати...\n";
 		await ctx.replyWithHTML(htmlText);
 		return ctx.wizard.next();
@@ -37,6 +25,7 @@ conditionStep.on("text", async (ctx) => {
 	try {
 		let inputLine = ctx.message.text;
 		console.log('inputLine:', inputLine);
+		console.log(((new Date()).toLocaleTimeString()));
 		axios({
 			method: 'post',
 			url: URL,
@@ -54,29 +43,25 @@ conditionStep.on("text", async (ctx) => {
 					ctx.replyWithHTML(`⛔️Ніякої інформації за запитом не знайдено`);
 					return ctx.scene.leave();
 				} else {
-					let answer = response.data.toString();
-					console.log(answer);
-					ctx.replyWithHTML(`🥎\n ${answer}.\n`);
-					params.host = response.data.split(',')[9];
-					params.username = devices.find(device => device.ip == params.host).username;
-					params.password = devices.find(device => device.ip == params.host).password;
-					//let cmd = cli.find(command => command.commandTlg == inputLine).commandEqv;
-					//console.log('cmd:', cmd);
-
-					params.password = response.data.split(',')[11];
-					connection.connect(params)
-						.then(prompt => {
-							connection.exec(cmd)
-								.then(res => {
-									console.log('promises result:', res);
+					ctx.replyWithHTML(`🥎\n ${response.data.toString()}.\n`);
+					let responseData = JSON.parse(response.data);
+					if (responseData.ResponseArray[0].HOST) {
+						const HOST = responseData.ResponseArray[0].HOST;
+						console.log(HOST);
+						let match = responseData.ResponseArray[0].Comment.match(/^\w+\/\d+:\d+/);
+						if (match) {
+							const comment = match[0];
+							console.log(comment);
+							telnetCall(HOST, comment)
+								.then(store => {
+									console.dir(store);
+									ctx.replyWithHTML(`🥎\n ${store.toString()}.\n`);
+								})
+								.catch(err => {
+									console.log(err);
 								});
-						}, error => {
-							console.log('promises reject:', error);
-						}).catch(error => {
-							console.log('catch error:', error);
-						});
-
-					ctx.replyWithHTML(`🥎\n ${res}.\n`);
+						}
+					}
 
 				}
 			})
@@ -85,7 +70,7 @@ conditionStep.on("text", async (ctx) => {
 				return ctx.scene.leave();
 			})
 			.then(() => {
-				ctx.replyWithHTML("👋💙💛 Have a nice day!\n");
+				ctx.replyWithHTML(`👋💙💛 Have a nice day!\n`);
 			});
 	} catch (err) {
 		console.log(err);
