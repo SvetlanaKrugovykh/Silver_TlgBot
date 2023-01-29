@@ -70,6 +70,10 @@ conditionStep.on("text", async (ctx) => {
 					ctx.replyWithHTML(`⛔️Ніякої інформації за запитом не знайдено`);
 					return ctx.scene.leave();
 				} else {
+					if (response.data.length > 3900) {
+						ctx.replyWithHTML(`\n The Answer is too long. Write another request..\n`);
+						return ctx.scene.leave();
+					}
 					console.log(response.data.toString());
 					ctx.replyWithHTML(`🥎\n ${response.data.toString()}.\n`);
 					let responseData = JSON.parse(response.data);
