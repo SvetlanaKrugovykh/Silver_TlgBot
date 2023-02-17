@@ -5,6 +5,9 @@ const URL = process.env.URL;
 const AUTH_TOKEN = process.env.AUTH_TOKEN;
 const sendReqToDB = require('../modules/tlg_to_DB');
 const telnetCall = require('../modules/telnet');
+const { getReceipt } = require('../modules/getReceipt');
+var telNumber = '';
+
 let infoFound = false;
 
 const startStep = new Composer();
@@ -23,7 +26,7 @@ startStep.on("text", async (ctx) => {
 const conditionStep = new Composer();
 conditionStep.on("text", async (ctx) => {
 	try {
-		console.log(((new Date()).toLocaleTimeString()));
+		console.log(((new Date()).toLocaleTimeString()));	
 		let inputLine = ctx.message.text;
 		console.log('inputLine:', inputLine);
 		if (inputLine.includes("id#")) {
@@ -46,6 +49,12 @@ conditionStep.on("text", async (ctx) => {
 					ctx.replyWithHTML(`🥎🥎 switchon# request sent\n`);
 					infoFound = false;
 					return ctx.scene.leave();
+				} else {
+					if (txtCommand.includes('invoice#') && !(telNumber == '')) {
+						console.log('Reguest for receipt for',telNumber);
+						getReceipt(telNumber, ctx);
+						return ctx.scene.leave();
+					}
 				}
 			} catch (err) {
 				console.log(err);
@@ -77,6 +86,10 @@ conditionStep.on("text", async (ctx) => {
 					console.log(response.data.toString());
 					ctx.replyWithHTML(`🥎\n ${response.data.toString()}.\n`);
 					let responseData = JSON.parse(response.data);
+					try {
+						telNumber = responseData.ResponseArray[0].telNumber;
+						console.log(`Admin request for the receipt ${telNumber}`);
+					} catch {};
 					if (responseData.ResponseArray[0].HOST) {
 						const HOST = responseData.ResponseArray[0].HOST;
 						console.log(HOST);
@@ -102,7 +115,7 @@ conditionStep.on("text", async (ctx) => {
 						return ctx.scene.leave();
 					}
 				}
-			})
+				})
 			.catch((err) => {
 				ctx.replyWithHTML(`⛔️Жодної інформації за запитом не знайдено`);
 				return ctx.scene.leave();
