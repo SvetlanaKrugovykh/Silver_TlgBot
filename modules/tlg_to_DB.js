@@ -23,6 +23,9 @@ async function sendReqToDB(reqType, data, text) {
 				} else {
 					let answer = response.data.toString();
 					console.log(answer);
+					if (reqType == '__CheckTlgClient__') {
+						return answer.includes('authorized');
+					} else return answer;
 				}
 			})
 			.catch((err) => {

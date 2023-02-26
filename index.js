@@ -2,10 +2,11 @@ require('dotenv').config();
 const axios = require("axios");
 const { Telegraf, Scenes, session } = require("telegraf");
 
-const { guestStartButtons, adminStartButtons } = require('./modules/keyboard');
+const { guestStartButtons, adminStartButtons, authStartButtons } = require('./modules/keyboard');
 const { users } = require('./users/users.model');
 
 const receiptScene = require('./controllers/receipt');
+const authScene = require('./controllers/auth');
 const supportScene = require('./controllers/support');
 const netwareAdminScene = require('./controllers/netwareAdmin');
 const clientsAdminScene = require('./controllers/clientsAdmin');
@@ -17,6 +18,7 @@ const bot = new Telegraf(TELEGRAM_BOT_TOKEN);
 
 const stage = new Scenes.Stage([
 	receiptScene,
+	authScene,
 	supportScene,
 	netwareAdminScene,
 	clientsAdminScene
@@ -33,13 +35,19 @@ bot.hears('Clients support', ctx => ctx.scene.enter('clientsAdminWizard'));
 bot.start(async (ctx) => {
 	console.log(new Date());
 	console.log(ctx.chat);
-	sendReqToDB('__CheckTlgClient__', ctx.chat, '');
-	const recognizeUser = users.find(user => user.id === ctx.chat.id);
-	if (!recognizeUser) {
+	const adminUser = users.find(user => user.id === ctx.chat.id);
+	if (!adminUser) {
 		try {
-			await ctx.replyWithHTML(`Чат-бот <b>ISP SILVER-SERVICE</b> вітає Вас, <b>${ctx.chat.first_name} ${ctx.chat.last_name}</b>!
+			const autorized = await sendReqToDB('__CheckTlgClient__', ctx.chat, '');
+			if (autorized) {
+				await ctx.replyWithHTML(`Чат-бот <b>ISP SILVER-SERVICE</b> вітає Вас, <b>${ctx.chat.first_name} ${ctx.chat.last_name}</b>!
+Вам надано авторизований доступ`);
+				await ctx.reply("Оберіть, будь ласка, дію", authStartButtons);
+			} else {
+				await ctx.replyWithHTML(`Чат-бот <b>ISP SILVER-SERVICE</b> вітає Вас, <b>${ctx.chat.first_name} ${ctx.chat.last_name}</b>!
 Вам надано гостьовий доступ`);
-			await ctx.reply("Оберіть, будь ласка, дію", guestStartButtons);
+				await ctx.reply("Оберіть, будь ласка, дію", guestStartButtons);
+			}
 		} catch (err) {
 			console.log(err);
 		}

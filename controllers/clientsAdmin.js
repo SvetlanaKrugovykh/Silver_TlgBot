@@ -26,7 +26,7 @@ startStep.on("text", async (ctx) => {
 const conditionStep = new Composer();
 conditionStep.on("text", async (ctx) => {
 	try {
-		console.log(((new Date()).toLocaleTimeString()));	
+		console.log(((new Date()).toLocaleTimeString()));
 		let inputLine = ctx.message.text;
 		console.log('inputLine:', inputLine);
 		if (inputLine.includes("id#")) {
@@ -51,7 +51,7 @@ conditionStep.on("text", async (ctx) => {
 					return ctx.scene.leave();
 				} else {
 					if (txtCommand.includes('invoice#') && !(telNumber == '')) {
-						console.log('Reguest for receipt for',telNumber);
+						console.log('Reguest for receipt for', telNumber);
 						getReceipt(telNumber, ctx);
 						return ctx.scene.leave();
 					}
@@ -89,23 +89,25 @@ conditionStep.on("text", async (ctx) => {
 					try {
 						telNumber = responseData.ResponseArray[0].telNumber;
 						console.log(`Admin request for the receipt ${telNumber}`);
-					} catch {};
+					} catch { };
 					if (responseData.ResponseArray[0].HOST) {
 						const HOST = responseData.ResponseArray[0].HOST;
-						console.log(HOST);
-						let match = responseData.ResponseArray[0].Comment.match(/^\w+\/\d+:\d+/);
-						if (match) {
-							const comment = match[0];
-							console.log(comment);
-							telnetCall(HOST, comment)
-								.then(store => {
-									console.dir(store);
-									ctx.replyWithHTML(`🥎\n ${store.toString()}.\n`);
-								})
-								.catch(err => {
-									console.log(err);
-								});
-						}
+						if (HOST.length > 12) {
+							console.log(HOST);
+							let match = responseData.ResponseArray[0].Comment.match(/^\w+\/\d+:\d+/);
+							if (match) {
+								const comment = match[0];
+								console.log(comment);
+								telnetCall(HOST, comment)
+									.then(store => {
+										console.dir(store);
+										ctx.replyWithHTML(`🥎\n ${store.toString()}.\n`);
+									})
+									.catch(err => {
+										console.log(err);
+									});
+							}
+						} else console.log('HOST is not define');
 					}
 
 
@@ -115,7 +117,7 @@ conditionStep.on("text", async (ctx) => {
 						return ctx.scene.leave();
 					}
 				}
-				})
+			})
 			.catch((err) => {
 				ctx.replyWithHTML(`⛔️Жодної інформації за запитом не знайдено`);
 				return ctx.scene.leave();
