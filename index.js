@@ -31,6 +31,7 @@ bot.hears('Отримати рахунок', ctx => ctx.scene.enter('receiptWiza
 bot.hears('Надіслати повідомлення', ctx => ctx.scene.enter('supportWizard'));
 bot.hears('Netware support', ctx => ctx.scene.enter('netwareAdminWizard'));
 bot.hears('Clients support', ctx => ctx.scene.enter('clientsAdminWizard'));
+bot.hears('Зареєструватися', ctx => ctx.scene.enter('authWizard'));
 
 bot.start(async (ctx) => {
 	console.log(new Date());
