@@ -15,6 +15,7 @@ startStep.on("text", async (ctx) => {
 				resize_keyboard: true
 			}
 		});
+		return ctx.wizard.next();
 	} catch (err) {
 		console.log(err);
 	}

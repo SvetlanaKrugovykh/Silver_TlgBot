@@ -5,6 +5,7 @@ const URL = process.env.URL;
 const AUTH_TOKEN = process.env.AUTH_TOKEN;
 const sendReqToDB = require('../modules/tlg_to_DB');
 const telnetCall = require('../modules/telnet');
+const { TelnetParams } = require('../data/telnet.model');
 const { getReceipt } = require('../modules/getReceipt');
 var telNumber = '';
 
@@ -92,7 +93,7 @@ conditionStep.on("text", async (ctx) => {
 					} catch { };
 					if (responseData.ResponseArray[0].HOST) {
 						const HOST = responseData.ResponseArray[0].HOST;
-						if (HOST.length > 12) {
+						if (HOST.length > 12 && TelnetParams.excludeHOSTS.includes(HOST) == false) {
 							console.log(HOST);
 							let match = responseData.ResponseArray[0].Comment.match(/^\w+\/\d+:\d+/);
 							if (match) {
