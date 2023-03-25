@@ -10,7 +10,7 @@ const { getReceipt } = require('../modules/getReceipt');
 var telNumber = '';
 
 let infoFound = false;
-
+const Params = new TelnetParams();
 const startStep = new Composer();
 
 startStep.on("text", async (ctx) => {
@@ -92,10 +92,11 @@ conditionStep.on("text", async (ctx) => {
 						console.log(`Admin request for the receipt ${telNumber}`);
 					} catch { };
 					if (responseData.ResponseArray[0].HOST) {
-						const HOST = responseData.ResponseArray[0].HOST;
-						if (HOST.length > 12 && !TelnetParams.excludeHOSTS.includes(HOST)) {
-							console.log(HOST);
+						const HOST = responseData.ResponseArray[0].HOST.toString();
+						console.log(HOST);
+						if (HOST.length > 12 && !Params.excludeHOSTS.includes(HOST)) {
 							let match = responseData.ResponseArray[0].Comment.match(/^\w+\/\d+:\d+/);
+							console.log(HOST + ' match= ' + match);
 							if (match) {
 								const comment = match[0];
 								console.log(comment);
