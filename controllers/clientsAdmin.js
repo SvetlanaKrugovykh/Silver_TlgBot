@@ -93,7 +93,7 @@ conditionStep.on("text", async (ctx) => {
 					} catch { };
 					if (responseData.ResponseArray[0].HOST) {
 						const HOST = responseData.ResponseArray[0].HOST;
-						if (HOST.length > 12 && TelnetParams.excludeHOSTS.includes(HOST) == false) {
+						if (HOST.length > 12 && !TelnetParams.excludeHOSTS.includes(HOST)) {
 							console.log(HOST);
 							let match = responseData.ResponseArray[0].Comment.match(/^\w+\/\d+:\d+/);
 							if (match) {
